@@ -1,6 +1,36 @@
+'use client';
+
+import useSWR from 'swr';
+
 import Image from "next/image";
+import Web3 from "web3";
+
+const getAccounts = async () => {
+  const provider = window?.ethereum;
+  console.log("Provider: ", provider);
+  const web3 = new Web3(provider);
+  let accounts = await web3.eth.getAccounts();
+  if (accounts.length > 0) {
+      console.log('Already connected:', accounts[0]);
+  } else {
+      console.log('No accounts connected yet.');
+      accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      console.log('Now connected:', accounts[0]);
+  }
+  return accounts;
+};
 
 export default function Home() {
+   // Use SWR with the custom fetcher
+   useSWR('web3-accounts', getAccounts, {
+    onSuccess: (data) => {
+      console.log("Fetched data: ", data);
+    },
+    onError: (error) => {
+      console.log("Fetch error: ", error);
+    },
+  });
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
